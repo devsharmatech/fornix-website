@@ -73,9 +73,13 @@ function QuizHistoryPage() {
     const filteredHistory = React.useMemo(() => {
         if (!quizHistory || !Array.isArray(quizHistory)) return [];
 
-        let filtered = [...quizHistory];
+        // First, filter out any unsubmitted or in-progress attempts
+        let filtered = quizHistory.filter(quiz => 
+            quiz.status === 'completed' || 
+            (quiz.completed_at && quiz.completed_at !== null)
+        );
 
-        // Apply filter
+        // Apply dropdown filter
         if (filter !== 'all') {
             filtered = filtered.filter(quiz => quiz.course_name?.toLowerCase() === filter.toLowerCase());
         }

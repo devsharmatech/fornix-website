@@ -190,22 +190,13 @@ function Header() {
             {user && <NotificationBell />}
             <button
               onClick={toggleMobileMenu}
-              className="bg-orange-500 p-2 rounded-full hover:bg-orange-600 transition"
+              className="relative p-2 -mr-2 text-gray-800 hover:bg-orange-50 rounded-xl transition-colors active:bg-orange-100 flex items-center justify-center focus:outline-none"
               aria-label="Toggle menu"
             >
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
-                    }`}
-                ></span>
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''
-                    }`}
-                ></span>
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
-                    }`}
-                ></span>
+              <div className="w-6 h-[18px] relative flex flex-col justify-between">
+                <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'transform rotate-45 translate-y-[7.5px]' : ''}`} />
+                <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-200 ease-in-out ${isMobileMenuOpen ? 'opacity-0 x-translate-4' : 'opacity-100'}`} />
+                <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'transform -rotate-45 -translate-y-[7.5px]' : ''}`} />
               </div>
             </button>
           </div>
@@ -298,7 +289,7 @@ function Header() {
               </div>
             </li>
 
-            <li>
+            {/* <li>
               <Link
                 to="/pricingPage"
                 onClick={closeMobileMenu}
@@ -306,7 +297,7 @@ function Header() {
               >
                 Pricing Plan
               </Link>
-            </li>
+            </li> */}
 
             <li>
               <Link
