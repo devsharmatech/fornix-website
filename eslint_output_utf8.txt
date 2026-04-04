@@ -1,0 +1,341 @@
+﻿
+C:\Nextjs\fornix-project\fornix-web\src\App.jsx
+  105:18  error  'err' is defined but never used  no-unused-vars
+  117:16  error  'err' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\AudioPlayer.jsx
+  39:8  warning  React Hook useEffect has missing dependencies: 'autoPlay' and 'isPlaying'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\ChapterCountDisplay.jsx
+  44:8  warning  React Hook useEffect has a missing dependency: 'subject.name'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\ChapterQuizModal.jsx
+  18:11  error  'activeUser' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\ChatWidget.jsx
+  17:5   error  'selectCourseContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  42:11  error  'courseOptions' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\FirebaseNotifications.jsx
+  40:10  error  Empty block statement              no-empty
+  44:12  error  'error' is defined but never used  no-unused-vars
+  44:19  error  Empty block statement              no-empty
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\Header.jsx
+  28:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  26 |       const localStorageKey = `profile_picture_${userId}`;
+  27 |       const savedPicture = userProfile?.profile_picture || localStorage.getItem(localStorageKey);
+> 28 |       setProfilePictureUrl(savedPicture);
+     |       ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |     }
+  30 |   }, [user, userProfile]);
+  31 |  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\NotificationBell.jsx
+  110:53  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  108 |                         </p>
+  109 |                         <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium whitespace-nowrap shrink-0 mt-0.5">
+> 110 |                           {new Date(n.created_at || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+      |                                                     ^^^^^^^^^^ Cannot call impure function
+  111 |                         </p>
+  112 |                       </div>
+  113 |                       <p className={`text-[11px] sm:text-xs leading-relaxed line-clamp-2 ${!n.is_read ? "text-gray-600" : "text-gray-500"}`}>  react-hooks/purity
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\PDFViewerModal.jsx
+  10:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+   8 |             const extension = pdfUrl.split('?')[0].split('.').pop().toLowerCase();
+   9 |             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+> 10 |             setIsImage(imageExtensions.includes(extension));
+     |             ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |         }
+  12 |     }, [pdfUrl]);
+  13 |  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\PricingCards.jsx
+  42:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  40 |             });
+  41 |             plans.sort((a, b) => a.duration_in_days - b.duration_in_days);
+> 42 |             setAllPlans(plans);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  43 |         }
+  44 |     }, [courses]);
+  45 |  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Components\UpgradePrompt.jsx
+  56:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  54 |             return getDuration(a) - getDuration(b);
+  55 |         });
+> 56 |         setCoursePlans(sorted);
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  57 |     }, [showPlans, allCourses, courseId]);
+  58 |
+  59 |     // Reset state when closed  react-hooks/set-state-in-effect
+  61:22  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  59 |     // Reset state when closed
+  60 |     useEffect(() => {
+> 61 |         if (!isOpen) setShowPlans(false);
+     |                      ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  62 |     }, [isOpen]);
+  63 |
+  64 |     if (!isOpen) return null;                  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\AMC.jsx
+  148:13  error    'hasAccess' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  170:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  168 |   useEffect(() => {
+  169 |     const allFeaturesSelected = features.every(feature => preferences[feature.id] !== undefined);
+> 170 |     setAllSelected(allFeaturesSelected);
+      |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  171 |   }, [preferences]);
+  172 |
+  173 |   const handlePreferenceSelect = (featureId, choice) => {  react-hooks/set-state-in-effect
+  171:6   warning  React Hook useEffect has a missing dependency: 'features'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  239:9   error    'handlePracticeClick' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\AMCSubjectPage.jsx
+  15:10  error  'showNotification' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\ChaptersPage.jsx
+   19:47   error    'hasExceededQuizLimit' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                          no-unused-vars
+  108:8    warning  React Hook useEffect has a missing dependency: 'expandedChapters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  260:116  error    'courseId' is defined but never used                                                                                 no-unused-vars
+  261:11   error    'dispatch' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                             no-unused-vars
+  262:11   error    'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                             no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\Dashboard.jsx
+    6:5   error    'selectEnrolledCourses' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+   49:11  warning  The 'courses' conditional could make the dependencies of useEffect Hook (at line 163) change on every render. To fix this, wrap the initialization of 'courses' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+   54:11  error    'studyMaterials' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+   55:11  error    'mcqBank' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-unused-vars
+  137:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-unused-vars
+  151:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  149 |             const localStorageKey = `profile_picture_${userId}`;
+  150 |             const savedPicture = userProfile?.profile_picture || localStorage.getItem(localStorageKey);
+> 151 |             setProfilePictureUrl(savedPicture);
+      |             ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  152 |         }
+  153 |     }, [userId, userProfile]);
+  154 |  react-hooks/set-state-in-effect
+  173:16  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-empty
+  177:11  error    'handleLogout' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  191:11  error    'handleSubjectClick' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  195:11  error    'handleMaterialClick' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               no-unused-vars
+  199:11  error    'handleMCQClick' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\FMGE.jsx
+  39:9  error  'mockTests' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+  40:9  error  'mockTestsLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  70:9  error  'handleStartMockTest' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\Home.jsx
+  16:9  error  'courses' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\Login.jsx
+   97:9  error  'handleGoogleSuccess' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  121:9  error  'handleGoogleError' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\NeetPg.jsx
+  36:9  error  'mockTests' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+  37:9  error  'mockTestsLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  70:9  error  'handleStartMockTest' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\NeetUg.jsx
+  36:9  error  'mockTests' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+  37:9  error  'mockTestsLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  70:9  error  'handleStartMockTest' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\NotesPage.jsx
+  22:13  error  'topicId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\PLAB.jsx
+  25:10  error  'formatSubjectName' is defined but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  38:11  error  'mockTests' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+  39:11  error  'mockTestsLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  66:11  error  'handleStartMockTest' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\PYTTopics.jsx
+  40:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  38 |                 }
+  39 |             });
+> 40 |             setAvailableYears(Array.from(years).sort((a, b) => b - a));
+     |             ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  41 |         }
+  42 |     }, [topics]);
+  43 |  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\PricingPage.jsx
+  39:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  37 |             // Sort by duration
+  38 |             plans.sort((a, b) => a.duration_in_days - b.duration_in_days);
+> 39 |             setAllPlans(plans);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  40 |         }
+  41 |     }, [courses]);
+  42 |  react-hooks/set-state-in-effect
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\ProfilePage.jsx
+   23:11  error  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+   48:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  46 |     useEffect(() => {
+  47 |         if (profile) {
+> 48 |             setFormData({
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |                 full_name: profile.full_name || '',
+  50 |                 email: profile.email || '',
+  51 |                 phone: profile.phone || '',  react-hooks/set-state-in-effect
+   61:20  error  Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-empty
+  116:19  error  'result' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-unused-vars
+  243:18  error  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\QuizHistoryPage.jsx
+  32:16  error  Empty block statement  no-empty
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\QuizResultsPage.jsx
+    6:5   error    'fetchQuizResults' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-unused-vars
+   11:5   error    'clearQuizResult' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+   84:11  error    'currentMockTest' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+  120:21  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  118 |                 try {
+  119 |                     const parsedResults = JSON.parse(storedResults);
+> 120 |                     setLocalResults(parsedResults);
+      |                     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  121 |                 } catch (error) {
+  122 |                     console.error('Failed to parse stored quiz results:', error);
+  123 |                 }  react-hooks/set-state-in-effect
+  221:9   error    'score' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+  278:11  warning  The 'reviewQuestions' logical expression could make the dependencies of useMemo Hook (at line 301) change on every render. To fix this, wrap the initialization of 'reviewQuestions' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+  289:32  error    React Hook "React.useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/rules-of-hooks
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\QuizStart.jsx
+  99:9  error  'result' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\QuizTakingPage.jsx
+   27:11  error    'activeUser' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                           no-unused-vars
+  107:8   warning  React Hook useEffect has a missing dependency: 'handleSubmitQuiz'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  172:22  error    'e' is defined but never used                                                                                        no-unused-vars
+  215:19  error    'resultTestId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\SignUp.jsx
+  230:13  error  'response' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  319:13  error  'response' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\SmartTrackingPage.jsx
+   21:10   error  'fetchCoursesWithPlans' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   39:11   error  'courses' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u       no-unused-vars
+  404:158  error  Redundant double negation                                                                     no-extra-boolean-cast
+  415:91   error  Redundant double negation                                                                     no-extra-boolean-cast
+  423:100  error  Redundant double negation                                                                     no-extra-boolean-cast
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\UniversityExamResultPage.jsx
+  199:56  error  'index' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\Pages\UniversityExamTakingPage.jsx
+  117:23  error  'result' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\slices\authSlice.js
+   90:14  error  'error' is defined but never used   no-unused-vars
+  200:48  error  'action' is defined but never used  no-unused-vars
+  214:56  error  'action' is defined but never used  no-unused-vars
+  228:52  error  'action' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\slices\chaptersSlice.js
+  181:30  error  'state' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\slices\dashboardSlice.js
+  124:51  error  'action' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\slices\mockTestsSlice.js
+  154:80  error  'getState' is defined but never used  no-unused-vars
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\slices\quizSlice.js
+  256:11  error  Parsing error: Unterminated string constant
+
+C:\Nextjs\fornix-project\fornix-web\src\redux\store.js
+  53:13  error  'process' is not defined  no-undef
+
+C:\Nextjs\fornix-project\fornix-web\src\utils\accessControl.js
+  311:21  error  Parsing error: Unexpected token You
+
+Γ£û 93 problems (86 errors, 7 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

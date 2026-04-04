@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+/* Notification animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Global Button Animations */
+.btn-hover-effect {
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-95 active:translate-y-0;
+}
+
+.text-hover-effect {
+  @apply relative overflow-hidden;
+}
+
+.text-hover-effect::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 ease-out;
+}
+
+.text-hover-effect:hover::after {
+  @apply w-full;
+}
+
+/* Global Security Layers */
+body {
+  /* Prevent text and image selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Prevent drag and drop of elements, especially images */
+  -webkit-user-drag: none;
+}
+
+/* Disable all printing */
+@media print {
+  body {
+    display: none !important;
+  }
+}

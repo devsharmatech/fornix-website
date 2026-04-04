@@ -1,0 +1,312 @@
+﻿
+> client@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 58 modules transformed.
+node.exe : [31mΓ£ù[39m 
+Build failed in 6.20s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:
+\Users\devs7\AppData\Roami
+ng\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (  
+  [31mΓ£ù[39m Build fa   
+ iled in 6.20s:String)    
+ [], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+[31merror during build:
+[31m[vite:react-babel] C:
+\Nextjs\fornix-project\for
+nix-web\src\utils\accessCo
+ntrol.js: Missing 
+semicolon. (311:20)
+
+[0m [90m 309 |[31m 
+[32m    quiz: {[31m
+ [90m 310 |[31m [32m   
+   title: 'Free Quiz 
+Limit Reached',[31m
+[31m[1m>[22m[31m[90m 
+311 |[31m [32m      
+description: `[31m[33mYo
+u[31m[32m've used all 
+${QUIZ_LIMIT_FREE_USER} 
+free quiz attempts. 
+Upgrade to get unlimited 
+quizzes and full access 
+to all content.`,[31m
+ [90m     |[31m         
+            
+[31m[1m^[22m[31m
+ [90m 312 |[31m       
+cta[33m:[31m 
+[32m'Upgrade to 
+Premium'[31m
+ [90m 313 |[31m     
+}[33m,[31m
+ [90m 314 |[31m     
+full_notes[33m:[31m 
+{[0m[31m
+file: [36mC:/Nextjs/forni
+x-project/fornix-web/src/u
+tils/accessControl.js:311:
+20[31m
+    at constructor (C:\Nex
+tjs\fornix-project\fornix-
+web\node_modules\@babel\pa
+rser\lib\index.js:365:19)
+    at 
+JSXParserMixin.raise (C:\N
+extjs\fornix-project\forni
+x-web\node_modules\@babel\
+parser\lib\index.js:6599:1
+9)
+    at 
+JSXParserMixin.semicolon (
+C:\Nextjs\fornix-project\f
+ornix-web\node_modules\@ba
+bel\parser\lib\index.js:68
+95:10)
+    at JSXParserMixin.pars
+eExpressionStatement (C:\N
+extjs\fornix-project\forni
+x-web\node_modules\@babel\
+parser\lib\index.js:13275:
+10)
+    at JSXParserMixin.pars
+eStatementContent (C:\Next
+js\fornix-project\fornix-w
+eb\node_modules\@babel\par
+ser\lib\index.js:12889:19)
+    at JSXParserMixin.pars
+eStatementLike (C:\Nextjs\
+fornix-project\fornix-web\
+node_modules\@babel\parser
+\lib\index.js:12757:17)
+    at JSXParserMixin.pars
+eStatementListItem (C:\Nex
+tjs\fornix-project\fornix-
+web\node_modules\@babel\pa
+rser\lib\index.js:12737:17
+)
+    at JSXParserMixin.pars
+eBlockOrModuleBlockBody (C
+:\Nextjs\fornix-project\fo
+rnix-web\node_modules\@bab
+el\parser\lib\index.js:133
+06:61)
+    at JSXParserMixin.pars
+eBlockBody (C:\Nextjs\forn
+ix-project\fornix-web\node
+_modules\@babel\parser\lib
+\index.js:13299:10)
+    at 
+JSXParserMixin.parseBlock 
+(C:\Nextjs\fornix-project\
+fornix-web\node_modules\@b
+abel\parser\lib\index.js:1
+3287:10)
+    at JSXParserMixin.pars
+eFunctionBody (C:\Nextjs\f
+ornix-project\fornix-web\n
+ode_modules\@babel\parser\
+lib\index.js:12090:24)
+    at JSXParserMixin.pars
+eArrowExpression (C:\Nextj
+s\fornix-project\fornix-we
+b\node_modules\@babel\pars
+er\lib\index.js:12065:10)
+    at JSXParserMixin.pars
+eParenAndDistinguishExpres
+sion (C:\Nextjs\fornix-pro
+ject\fornix-web\node_modul
+es\@babel\parser\lib\index
+.js:11677:12)
+    at JSXParserMixin.pars
+eExprAtom (C:\Nextjs\forni
+x-project\fornix-web\node_
+modules\@babel\parser\lib\
+index.js:11321:23)
+    at JSXParserMixin.pars
+eExprAtom (C:\Nextjs\forni
+x-project\fornix-web\node_
+modules\@babel\parser\lib\
+index.js:4764:20)
+    at JSXParserMixin.pars
+eExprSubscripts (C:\Nextjs
+\fornix-project\fornix-web
+\node_modules\@babel\parse
+r\lib\index.js:11071:23)
+    at JSXParserMixin.pars
+eUpdate (C:\Nextjs\fornix-
+project\fornix-web\node_mo
+dules\@babel\parser\lib\in
+dex.js:11056:21)
+    at JSXParserMixin.pars
+eMaybeUnary (C:\Nextjs\for
+nix-project\fornix-web\nod
+e_modules\@babel\parser\li
+b\index.js:11036:23)
+    at JSXParserMixin.pars
+eMaybeUnaryOrPrivate (C:\N
+extjs\fornix-project\forni
+x-web\node_modules\@babel\
+parser\lib\index.js:10889:
+61)
+    at JSXParserMixin.pars
+eExprOps (C:\Nextjs\fornix
+-project\fornix-web\node_m
+odules\@babel\parser\lib\i
+ndex.js:10894:23)
+    at JSXParserMixin.pars
+eMaybeConditional (C:\Next
+js\fornix-project\fornix-w
+eb\node_modules\@babel\par
+ser\lib\index.js:10871:23)
+    at JSXParserMixin.pars
+eMaybeAssign (C:\Nextjs\fo
+rnix-project\fornix-web\no
+de_modules\@babel\parser\l
+ib\index.js:10821:21)
+    at C:\Nextjs\fornix-pr
+oject\fornix-web\node_modu
+les\@babel\parser\lib\inde
+x.js:10790:39
+    at 
+JSXParserMixin.allowInAnd 
+(C:\Nextjs\fornix-project\
+fornix-web\node_modules\@b
+abel\parser\lib\index.js:1
+2411:16)
+    at JSXParserMixin.pars
+eMaybeAssignAllowIn (C:\Ne
+xtjs\fornix-project\fornix
+-web\node_modules\@babel\p
+arser\lib\index.js:10790:1
+7)
+    at 
+JSXParserMixin.parseVar (C
+:\Nextjs\fornix-project\fo
+rnix-web\node_modules\@bab
+el\parser\lib\index.js:133
+74:91)
+    at JSXParserMixin.pars
+eVarStatement (C:\Nextjs\f
+ornix-project\fornix-web\n
+ode_modules\@babel\parser\
+lib\index.js:13220:10)
+    at JSXParserMixin.pars
+eStatementContent (C:\Next
+js\fornix-project\fornix-w
+eb\node_modules\@babel\par
+ser\lib\index.js:12841:23)
+    at JSXParserMixin.pars
+eStatementLike (C:\Nextjs\
+fornix-project\fornix-web\
+node_modules\@babel\parser
+\lib\index.js:12757:17)
+    at JSXParserMixin.pars
+eStatementListItem (C:\Nex
+tjs\fornix-project\fornix-
+web\node_modules\@babel\pa
+rser\lib\index.js:12737:17
+)
+    at JSXParserMixin.pars
+eExportDeclaration (C:\Nex
+tjs\fornix-project\fornix-
+web\node_modules\@babel\pa
+rser\lib\index.js:13924:17
+)
+    at JSXParserMixin.mayb
+eParseExportDeclaration (C
+:\Nextjs\fornix-project\fo
+rnix-web\node_modules\@bab
+el\parser\lib\index.js:138
+83:31)
+    at JSXParserMixin.pars
+eExport (C:\Nextjs\fornix-
+project\fornix-web\node_mo
+dules\@babel\parser\lib\in
+dex.js:13802:29)
+    at JSXParserMixin.pars
+eStatementContent (C:\Next
+js\fornix-project\fornix-w
+eb\node_modules\@babel\par
+ser\lib\index.js:12868:27)
+    at JSXParserMixin.pars
+eStatementLike (C:\Nextjs\
+fornix-project\fornix-web\
+node_modules\@babel\parser
+\lib\index.js:12757:17)
+    at JSXParserMixin.pars
+eModuleItem (C:\Nextjs\for
+nix-project\fornix-web\nod
+e_modules\@babel\parser\li
+b\index.js:12734:17)
+    at JSXParserMixin.pars
+eBlockOrModuleBlockBody (C
+:\Nextjs\fornix-project\fo
+rnix-web\node_modules\@bab
+el\parser\lib\index.js:133
+06:36)
+    at JSXParserMixin.pars
+eBlockBody (C:\Nextjs\forn
+ix-project\fornix-web\node
+_modules\@babel\parser\lib
+\index.js:13299:10)
+    at JSXParserMixin.pars
+eProgram (C:\Nextjs\fornix
+-project\fornix-web\node_m
+odules\@babel\parser\lib\i
+ndex.js:12612:10)
+    at JSXParserMixin.pars
+eTopLevel (C:\Nextjs\forni
+x-project\fornix-web\node_
+modules\@babel\parser\lib\
+index.js:12602:25)
+    at 
+JSXParserMixin.parse (C:\N
+extjs\fornix-project\forni
+x-web\node_modules\@babel\
+parser\lib\index.js:14478:
+25)
+    at parse (C:\Nextjs\fo
+rnix-project\fornix-web\no
+de_modules\@babel\parser\l
+ib\index.js:14512:38)
+    at parser (C:\Nextjs\f
+ornix-project\fornix-web\n
+ode_modules\@babel\core\li
+b\parser\index.js:41:34)
+    at parser.next 
+(<anonymous>)
+    at normalizeFile (C:\N
+extjs\fornix-project\forni
+x-web\node_modules\@babel\
+core\lib\transformation\no
+rmalize-file.js:64:37)
+    at normalizeFile.next 
+(<anonymous>)
+    at run (C:\Nextjs\forn
+ix-project\fornix-web\node
+_modules\@babel\core\lib\t
+ransformation\index.js:22:
+50)
+    at run.next 
+(<anonymous>)
+    at transform (C:\Nextj
+s\fornix-project\fornix-we
+b\node_modules\@babel\core
+\lib\transform.js:22:33)
+    at transform.next 
+(<anonymous>)[39m
