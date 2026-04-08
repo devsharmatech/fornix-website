@@ -9,9 +9,9 @@ import {
     selectQuizLoading,
     selectQuizError,
 } from '../redux/slices/quizSlice';
-import { selectUser } from '../redux/slices/authSlice';
+import { selectUser, selectAuthLoading } from '../redux/slices/authSlice';
 import { selectUserProfile, fetchUserDetails } from '../redux/slices/userSlice';
-import { selectCurrentMockTest, submitMockTest } from '../redux/slices/mockTestsSlice';
+import { selectCurrentMockTest, submitMockTest, fetchMockTestResult, startMockTest } from '../redux/slices/mockTestsSlice';
 import { showNotification } from '../redux/slices/uiSlice';
 import API from '../api/api';
 
@@ -38,6 +38,7 @@ function QuizTakingPage() {
     const currentQuiz = useSelector(selectCurrentQuiz);
     const currentMockTest = useSelector(selectCurrentMockTest);
     const loading = useSelector(selectQuizLoading);
+    const authLoading = useSelector(selectAuthLoading);
     const error = useSelector(selectQuizError);
 
     // Use currentMockTest if available (has higher priority), otherwise use currentQuiz
@@ -52,6 +53,8 @@ function QuizTakingPage() {
 
     const isMockTest = location.state?.isMockTest;
     const mockTestId = location.state?.testId;
+
+    const [hasAttemptedRecovery, setHasAttemptedRecovery] = useState(false);
 
     
 
@@ -71,6 +74,36 @@ function QuizTakingPage() {
                 // If not set, user might need to go back.
             }
             return;
+        }
+
+        // Handle refresh persistence for 'direct' route
+        if (quizId === 'direct' && !quiz?.questions?.length && (user?.user_id || user?.id)) {
+            const persistedId = localStorage.getItem('active_quiz_attempt_id');
+            const persistedIsMock = localStorage.getItem('active_quiz_is_mock') === 'true';
+
+            if (persistedId) {
+                if (persistedIsMock) {
+                    // For mock tests, we usually need the test_id to 'resume' or re-fetch
+                    // If we only have attemptId, we hope fetchAttemptDetails is generic enough,
+                    // OR we check if we stored the testId too.
+                    dispatch(fetchAttemptDetails({
+                        user_id: user?.user_id || user?.id,
+                        attempt_id: persistedId
+                    }));
+                } else {
+                    dispatch(fetchAttemptDetails({
+                        user_id: user?.user_id || user?.id,
+                        attempt_id: persistedId
+                    }));
+                }
+                setHasAttemptedRecovery(true);
+                return;
+            }
+        }
+
+        // Mark recovery as attempted if we reached this point without user or without persistence
+        if (quizId === 'direct' && !hasAttemptedRecovery && (user || !localStorage.getItem('token'))) {
+            setHasAttemptedRecovery(true);
         }
 
         // Only fetch if we have a real attempt ID (not 'direct') and NOT a mock test
@@ -198,8 +231,12 @@ function QuizTakingPage() {
 
         
         
+        
 
         if (response.data.success) {
+            // Clean up session persistence for mock test
+            localStorage.removeItem('active_quiz_attempt_id');
+            localStorage.removeItem('active_quiz_is_mock');
 
             dispatch(showNotification({
                 type: 'success',
@@ -229,56 +266,20 @@ function QuizTakingPage() {
             // Convert option indices to keys (0 -> 'a', 1 -> 'b', etc.)
             const optionKeys = ['a', 'b', 'c', 'd', 'e'];
 
-            // For direct quizzes, calculate score locally (Fallback only)
-            if (quizId === 'direct') {
-                let correctCount = 0;
-                const totalQuestions = quiz?.questions?.length || 0;
+            // Standardized Submission Flow:
+            // Even if the URL is 'direct', we use the real attempt_id from the quiz data
+            const realAttemptId = quiz?.attempt_id || quiz?.id || (quizId !== 'direct' ? quizId : null);
 
-                quiz.questions.forEach(question => {
-                    const userAnswer = answers[question.id];
-                    if (userAnswer !== undefined && optionKeys[userAnswer] === question.correct_answer) {
-                        correctCount++;
-                    }
-                });
-
-                const quizResults = {
-                    quiz_id: 'direct',
-                    total_questions: totalQuestions,
-                    correct_answers: correctCount,
-                    incorrect_answers: totalQuestions - correctCount,
-                    score: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0,
-                    percentage: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0,
-                    time_taken: quiz?.duration ? (quiz.duration * 60 - (timeRemaining || 0)) : 0,
-                    questions: quiz.questions.map(q => ({
-                        ...q,
-                        user_answer: optionKeys[answers[q.id]],
-                        is_correct: optionKeys[answers[q.id]] === q.correct_answer
-                    }))
-                };
-
-                localStorage.setItem('quiz_results_direct', JSON.stringify(quizResults));
+            if (!realAttemptId) {
                 dispatch(showNotification({
-                    type: 'success',
-                    message: `Test completed! Score: ${correctCount}/${totalQuestions}`
+                    type: 'error',
+                    message: 'No active session found. Please restart the quiz.'
                 }));
-
-                navigate(`/quiz/results/direct`);
+                setIsSubmitting(false);
                 return;
             }
 
-            // For attempt-based quizzes, submit to API
-            const attemptId = quizId;
-            console.log('Submission Body:', {
-                user_id: user?.user_id || user?.id,
-                attempt_id: attemptId,
-                subject_id: quiz?.subject_id,
-                question_type: quiz?.question_type,
-                time_taken_seconds: quiz?.duration ? (quiz.duration * 60 - (timeRemaining || 0)) : 0,
-                answers: quiz?.questions?.map(q => ({
-                    question_id: q.id,
-                    selected_key: answers[q.id] !== undefined ? optionKeys[answers[q.id]] : null
-                })) || []
-            });
+            const attemptId = realAttemptId;
             // Determine if it's an attempt-based quiz (AMC Subject or Chapter)
             if (quiz?.attempt_id || quiz?.subject_id || location.state?.isSubjectQuiz || location.state?.isChapterQuiz) {
                 const submissionData = {
@@ -297,6 +298,10 @@ function QuizTakingPage() {
                     type: 'success',
                     message: 'Test submitted successfully!'
                 }));
+
+                // Clean up session persistence for standard quiz
+                localStorage.removeItem('active_quiz_attempt_id');
+                localStorage.removeItem('active_quiz_is_mock');
 
                 // For AMC, the result usually contains the quiz_id/attempt_id
                 navigate(`/quiz/results/${result.attempt_id || attemptId}`);
@@ -342,6 +347,10 @@ function QuizTakingPage() {
                     message: 'Mock test submitted successfully!'
                 }));
 
+                // Clean up session persistence for mock test
+                localStorage.removeItem('active_quiz_attempt_id');
+                localStorage.removeItem('active_quiz_is_mock');
+
                 // Navigate to results page with mock test indicator
                 // Priorities: 
                 // 1. result.test_id (if returned by submit)
@@ -359,6 +368,10 @@ function QuizTakingPage() {
             } else {
                 // Submit to regular quiz endpoint
                 const result = await dispatch(submitQuiz(submissionData)).unwrap();
+                
+                // Clean up session persistence for standard quiz
+                localStorage.removeItem('active_quiz_attempt_id');
+                localStorage.removeItem('active_quiz_is_mock');
 
                 dispatch(showNotification({
                     type: 'success',
@@ -393,18 +406,39 @@ function QuizTakingPage() {
         setCurrentQuestionIndex(index);
     };
 
-    if (loading) {
+    // Initial loading state (Wait for auth and quiz data)
+    // We show loading if:
+    // 1. Redux specifies we are loading
+    // 2. Auth is still initializing (authLoading)
+    // 3. We are on 'direct' route and haven't tried recovering from localStorage yet (if a token exists)
+    const hasToken = !!localStorage.getItem('token');
+    const hasPersistedQuiz = !!localStorage.getItem('active_quiz_attempt_id');
+    
+    if (loading || 
+        (hasToken && authLoading) || 
+        (quizId === 'direct' && !quiz?.questions?.length && hasPersistedQuiz && !hasAttemptedRecovery)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-32">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading test...</p>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-16 h-16">
+                        <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: '2s' }} viewBox="0 0 64 64" fill="none">
+                            <circle cx="32" cy="32" r="28" stroke="#fed7aa" strokeWidth="4" />
+                            <path d="M60 32a28 28 0 0 0-28-28" stroke="#f97316" strokeWidth="4" strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-orange-500"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 font-medium">Loading your test…</p>
                 </div>
             </div>
         );
     }
 
-    if (error || !quiz || !quiz.questions || quiz.questions.length === 0) {
+    // Show error only if we're not loading and data is truly missing
+    // AND we have finished our authentication/recovery checks
+    const isAuthFinalized = !hasToken || (!authLoading && user);
+    if (isAuthFinalized && (error || !quiz || !quiz.questions || quiz.questions.length === 0)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-32">
                 <div className="text-center max-w-md">
@@ -427,6 +461,76 @@ function QuizTakingPage() {
     const currentQuestion = quiz.questions[currentQuestionIndex];
     const totalQuestions = quiz.questions.length;
     const answeredCount = Object.keys(answers).length;
+
+    // Full-screen submit overlay
+    if (isSubmitting) {
+        return (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-6">
+                    {/* Animated checkmark + orbit SVG */}
+                    <div className="relative w-36 h-36">
+                        {/* Outer rotating ring */}
+                        <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 144 144" fill="none">
+                            <circle cx="72" cy="72" r="66" stroke="#fed7aa" strokeWidth="4" strokeDasharray="8 6" strokeLinecap="round" />
+                        </svg>
+                        {/* Middle pulsing ring */}
+                        <svg className="absolute inset-0 w-full h-full" style={{ animation: 'pulse 1.5s ease-in-out infinite' }} viewBox="0 0 144 144" fill="none">
+                            <circle cx="72" cy="72" r="52" stroke="#fb923c" strokeWidth="3" strokeDasharray="16 8" strokeLinecap="round" opacity="0.5" />
+                        </svg>
+                        {/* Center brain / document icon */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center shadow-inner">
+                                <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12" xmlns="http://www.w3.org/2000/svg">
+                                    {/* Document */}
+                                    <rect x="10" y="6" width="28" height="36" rx="4" fill="#fff7ed" stroke="#f97316" strokeWidth="2" />
+                                    <line x1="16" y1="16" x2="32" y2="16" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                    <line x1="16" y1="22" x2="32" y2="22" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                    <line x1="16" y1="28" x2="26" y2="28" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                    {/* Animated check circle overlay */}
+                                    <circle cx="34" cy="34" r="10" fill="#22c55e" />
+                                    <polyline points="29,34 32.5,37.5 39,30" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'drawCheck 0.5s ease forwards 0.3s', strokeDasharray: 20, strokeDashoffset: 20 }} />
+                                </svg>
+                            </div>
+                        </div>
+                        {/* Orbiting dot */}
+                        <div className="absolute inset-0" style={{ animation: 'orbit 2s linear infinite' }}>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-orange-500 shadow-md shadow-orange-300"></div>
+                        </div>
+                    </div>
+
+                    <div className="text-center">
+                        <h2 className="text-2xl font-black text-gray-900 mb-1">Submitting Your Test</h2>
+                        <p className="text-gray-500 text-sm">Evaluating answers and calculating score…</p>
+                    </div>
+
+                    {/* Animated progress dots */}
+                    <div className="flex gap-2">
+                        {[0, 1, 2, 3].map(i => (
+                            <div
+                                key={i}
+                                className="w-2.5 h-2.5 rounded-full bg-orange-400"
+                                style={{ animation: `bounce 1s ease-in-out ${i * 0.15}s infinite` }}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                <style>{`
+                    @keyframes orbit {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    @keyframes drawCheck {
+                        to { stroke-dashoffset: 0; }
+                    }
+                    @keyframes bounce {
+                        0%, 100% { transform: translateY(0); opacity: 0.4; }
+                        50% { transform: translateY(-8px); opacity: 1; }
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pt-20 sm:pt-32 pb-10">
@@ -669,4 +773,3 @@ function QuizTakingPage() {
 }
 
 export default QuizTakingPage;
-

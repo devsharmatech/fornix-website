@@ -38,6 +38,21 @@ export const fetchTopicsByChapter = createAsyncThunk(
   }
 );
 
+// Reset chapter quiz progress for a user
+export const resetChapterProgress = createAsyncThunk(
+  'chapters/resetProgress',
+  async ({ user_id, chapter_id, subject_id }, { dispatch, rejectWithValue }) => {
+    try {
+      await API.post('/chapter-quizzes/reset', { user_id, chapter_id });
+      // Re-fetch chapters to refresh stats
+      dispatch(fetchChaptersBySubject(subject_id));
+      return { chapter_id };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to reset progress');
+    }
+  }
+);
+
 // Fetch notes for a specific chapter
 export const fetchChapterNotes = createAsyncThunk(
   'chapters/fetchNotes',

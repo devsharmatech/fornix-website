@@ -75,6 +75,11 @@ function NeetUg() {
       // Navigate using attempt_id from the nested structure
       // The API returns: { success, message, attempt: { id, started_at }, questions: [] }
       const attemptId = result.attempt?.id || result.attempt_id || result.id || testId;
+
+      // Save attempt info for refresh recovery
+      localStorage.setItem('active_quiz_attempt_id', attemptId);
+      localStorage.setItem('active_quiz_is_mock', 'true');
+
       navigate(`/quiz/taking/${attemptId}`);
     } catch (error) {
       console.error('Failed to start mock test:', error);

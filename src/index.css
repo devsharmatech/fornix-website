@@ -76,3 +76,8 @@ body {
     display: none !important;
   }
 }
+
+a,
+button {
+  cursor: pointer !important;
+}

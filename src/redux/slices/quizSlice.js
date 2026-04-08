@@ -335,6 +335,29 @@ export const startMultiChapterQuiz = createAsyncThunk(
   }
 );
 
+export const fetchQuizAvailableStats = createAsyncThunk(
+  'quiz/fetchQuizAvailableStats',
+  async (requestData, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      let user_id = requestData.user_id;
+      if (!user_id) {
+        user_id = state.auth.user?.user_id || state.auth.user?.id || state.auth.user?.uuid;
+      }
+      
+      const dataToSend = {
+        ...requestData,
+        user_id
+      };
+      
+      const response = await API.post('/quiz/available-stats', dataToSend);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch available quiz stats');
+    }
+  }
+);
+
 // AMC Quiz thunks
 export const startAMCQuiz = createAsyncThunk(
   'quiz/startAMC',
@@ -560,9 +583,48 @@ const quizSlice = createSlice({
       .addCase(fetchAttemptDetails.fulfilled, (state, action) => {
         state.loading = false;
         state.attemptDetails = action.payload;
-        // Also set as currentQuiz if it has questions
-        if (action.payload?.questions) {
-          state.currentQuiz = action.payload;
+        
+        // Also set as currentQuiz for recovery or details view
+        // Map all known response formats from various endpoints
+        const questions = 
+          action.payload?.questions || 
+          action.payload?.review || 
+          action.payload?.results ||
+          action.payload?.data?.questions ||
+          action.payload?.data ||
+          action.payload?.attempt?.questions ||
+          action.payload?.attempt?.review ||
+          [];
+
+        if (questions.length > 0) {
+          state.currentQuiz = {
+            ...action.payload,
+            // Ensure core fields are mapped correctly for taking page
+            questions: questions.map(q => {
+              // The backend 'review' format wraps the question in a 'question' property
+              const item = q.question || q;
+              return {
+                ...item,
+                id: item.id || q.question_id || q.id || q.uuid,
+                question: item.question_text || item.question || item.text,
+                options: item.options || q.options || item.choices || [],
+                correct_answer: q.correct_key || item.correct_key || item.correct_answer || q.answer,
+                explanation: item.explanation || q.explanation,
+                question_type: item.question_type || q.question_type || (action.payload?.attempt?.question_type),
+                question_image_url: item.question_image_url || q.question_image_url || item.image_url || item.image
+              };
+            })
+          };
+        } else if (action.payload?.attempt && !action.payload.questions) {
+            // If we have an attempt but NO questions in review/questions, 
+            // maybe they are inside action.payload.attempt directly?
+            const attemptQuestions = action.payload.attempt.questions || [];
+            if (attemptQuestions.length > 0) {
+                state.currentQuiz = {
+                    ...action.payload,
+                    questions: attemptQuestions
+                };
+            }
         }
       })
       .addCase(fetchAttemptDetails.rejected, (state, action) => {

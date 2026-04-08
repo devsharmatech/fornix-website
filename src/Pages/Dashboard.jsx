@@ -152,16 +152,6 @@ function Dashboard() {
         }
     }, [userId, userProfile]);
 
-    // For debugging
-    useEffect(() => {
-        console.log('Dashboard Component State:', {
-            hasUser: !!user,
-            userId: userId,
-            coursesCount: courses.length,
-            enrolledCoursesRaw: courses
-        });
-    }, [user, courses, userId]);
-
     useEffect(() => {
         if (userId) {
             dispatch(fetchEnrolledCourses(userId));

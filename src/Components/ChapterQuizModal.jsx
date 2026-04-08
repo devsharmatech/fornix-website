@@ -18,6 +18,7 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
     const activeUser = userProfile || user;
 
     const [questionType, setQuestionType] = useState('mixed');
+    const [questionCount, setQuestionCount] = useState(20);
 
     if (!isOpen || !chapter) return null;
 
@@ -33,7 +34,8 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
         try {
             const payload = {
                 chapter_id: chapter.id,
-                question_type: questionType.toLowerCase()
+                question_type: questionType.toLowerCase(),
+                limit: questionCount,
             };
 
             
@@ -125,6 +127,21 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
     ];
 
     const selectedDiff = difficulties.find(d => d.key === questionType);
+    // Cap at unattempted count — never allow requesting more than what's available fresh
+    const maxForDiff = Math.min(selectedDiff?.unattempted || 0, 200);
+
+    const handleSetDifficulty = (key) => {
+        setQuestionType(key);
+        const diff = difficulties.find(d => d.key === key);
+        const max = Math.min(diff?.unattempted || 0, 200);
+        setQuestionCount(prev => Math.min(prev || 20, max || 1));
+    };
+
+    const handleCountInput = (val) => {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 1) { setQuestionCount(1); return; }
+        setQuestionCount(Math.min(num, maxForDiff));
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -179,7 +196,7 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
                             return (
                                 <button
                                     key={diff.key}
-                                    onClick={() => setQuestionType(diff.key)}
+                                    onClick={() => handleSetDifficulty(diff.key)}
                                     className={`relative cursor-pointer rounded-2xl border-2 p-4 text-left transition-all duration-300 group overflow-hidden ${
                                         isActive
                                             ? `${diff.bgSelected} ${diff.borderSelected} text-white scale-[1.02]`
@@ -233,6 +250,62 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
                         })}
                     </div>
 
+                    {/* --- QUESTION COUNT --- */}
+                    {maxForDiff > 0 && (
+                        <div className="mt-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+                                    Number of Questions
+                                </label>
+                                <span className="text-xs font-bold text-gray-500">
+                                    Unattempted: <span className="text-orange-600">{maxForDiff}</span>
+                                </span>
+                            </div>
+
+                            {/* Preset buttons */}
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {[10, 20, 50, 100, 200].filter(n => n <= maxForDiff).map(n => (
+                                    <button
+                                        key={n}
+                                        onClick={() => setQuestionCount(n)}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer border transition-all ${
+                                            questionCount === n
+                                                ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600'
+                                        }`}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                                {/* "All" preset */}
+                                <button
+                                    onClick={() => setQuestionCount(maxForDiff)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer border transition-all ${
+                                        questionCount === maxForDiff
+                                            ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600'
+                                    }`}
+                                >
+                                    All ({maxForDiff})
+                                </button>
+                            </div>
+
+                            {/* Custom number input */}
+                            <div className="flex items-center gap-3 bg-gray-50 rounded-2xl border border-gray-200 px-4 py-3">
+                                <span className="text-xs font-bold text-gray-500 shrink-0">Custom:</span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={maxForDiff}
+                                    value={questionCount}
+                                    onChange={(e) => handleCountInput(e.target.value)}
+                                    className="flex-1 text-center text-lg font-black text-orange-600 bg-transparent outline-none border-none w-20"
+                                />
+                                <span className="text-xs text-gray-400 shrink-0">/ {maxForDiff}</span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* --- ACTION BUTTONS --- */}
                     <div className="pt-6 flex flex-col sm:flex-row gap-3">
                         <button
@@ -243,7 +316,7 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
                         </button>
                         <button
                             onClick={handleStart}
-                            disabled={loading || (selectedDiff && selectedDiff.total === 0)}
+                            disabled={loading || maxForDiff === 0}
                             className={`flex-[2] py-3.5 cursor-pointer text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 ${
                                 selectedDiff ? `bg-gradient-to-r ${selectedDiff.gradient}` : 'bg-gradient-to-r from-orange-500 to-orange-600'
                             }`}
@@ -256,7 +329,7 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
                             ) : (
                                 <>
                                     <FiZap className="w-4 h-4" />
-                                    <span>Start {selectedDiff?.label || ''} Quiz</span>
+                                    <span>Start {questionCount} {selectedDiff?.label || ''} Qs</span>
                                     <FiArrowRight className="w-4 h-4" />
                                 </>
                             )}
@@ -264,7 +337,12 @@ const ChapterQuizModal = ({ isOpen, onClose, chapter }) => {
                     </div>
 
                     {/* Disabled hint */}
-                    {selectedDiff && selectedDiff.total === 0 && (
+                    {maxForDiff === 0 && selectedDiff && (
+                        <p className="text-center text-xs text-orange-500 mt-3 font-medium">
+                            🎉 All {selectedDiff.total} questions attempted! Reset progress to retry.
+                        </p>
+                    )}
+                    {maxForDiff > 0 && selectedDiff && selectedDiff.total === 0 && (
                         <p className="text-center text-xs text-red-400 mt-3 font-medium">
                             No questions available for this difficulty level.
                         </p>

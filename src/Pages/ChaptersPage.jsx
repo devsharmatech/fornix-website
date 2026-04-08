@@ -5,6 +5,7 @@ import {
     fetchChaptersBySubject,
     fetchTopicsByChapter,
     fetchChapterNotes,
+    resetChapterProgress,
     selectChapters,
     selectTopicsForChapter,
     selectChapterNotes,
@@ -16,7 +17,7 @@ import PDFViewerModal from '../Components/PDFViewerModal';
 import ChapterQuizModal from '../Components/ChapterQuizModal';
 import UpgradePrompt from '../Components/UpgradePrompt';
 import QuizAttemptsCounter from '../Components/QuizAttemptsCounter';
-import { canAttemptQuiz, getUsedQuizAttempts, hasExceededQuizLimit, getNoteType } from '../utils/accessControl';
+import { canAttemptQuiz, getUsedQuizAttempts, hasExceededQuizLimit, getNoteType, isActiveSubscriber } from '../utils/accessControl';
 import { FiBookOpen, FiFileText, FiChevronDown, FiArrowRight, FiTarget, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdQuiz } from 'react-icons/md';
@@ -144,7 +145,7 @@ function ChaptersPage() {
                     </div>
 
                     {/* Quiz Attempts Counter for Free Users */}
-                    {activeUser && !activeUser.has_active_subscription && (
+                    {activeUser && !isActiveSubscriber(activeUser) && (
                         <div className="w-full md:w-80">
                             <QuizAttemptsCounter
                                 used={getUsedQuizAttempts(activeUser)}
@@ -204,6 +205,7 @@ function ChaptersPage() {
                                     onOpenPdf={handleOpenPdf}
                                     onQuizNavigate={handleQuizNavigation}
                                     courseId={courseId}
+                                    subjectId={subjectId}
                                 />
                             ))}
                         </div>
@@ -257,15 +259,28 @@ function ChaptersPage() {
 }
 
 // Sub-component for Accordion Item
-function ChapterAccordion({ chapter, activeTab, isOpen, onToggle, isSelected, onSelect, onOpenPdf, onQuizNavigate, courseId }) {
+function ChapterAccordion({ chapter, activeTab, isOpen, onToggle, isSelected, onSelect, onOpenPdf, onQuizNavigate, courseId, subjectId }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const user = useSelector(selectUser);
 
     const notesData = useSelector(selectChapterNotes(chapter.id));
     const topicsData = useSelector(selectTopicsForChapter(chapter.id));
     const chapterTopics = topicsData.topics;
 
     const [isChapterQuizModalOpen, setChapterQuizModalOpen] = useState(false);
+    const [resetting, setResetting] = useState(false);
+
+    const handleReset = async () => {
+        const userId = user?.user_id || user?.id;
+        if (!userId) return;
+        setResetting(true);
+        try {
+            await dispatch(resetChapterProgress({ user_id: userId, chapter_id: chapter.id, subject_id: subjectId }));
+        } finally {
+            setResetting(false);
+        }
+    };
 
     // Extract stats from chapter data
     const stats = chapter.stats || {};
@@ -371,6 +386,26 @@ function ChapterAccordion({ chapter, activeTab, isOpen, onToggle, isSelected, on
                                     ></div>
                                 </div>
                             </div>
+
+                            {/* Reset button when all questions are attempted */}
+                            {unattempted === 0 && totalQ > 0 && (
+                                <div className="mb-4 flex justify-center">
+                                    <button
+                                        onClick={handleReset}
+                                        disabled={resetting}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 hover:border-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        {resetting ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+                                                Resetting...
+                                            </>
+                                        ) : (
+                                            <>🔄 Reset Progress</>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Bottom row: Easy / Moderate / Difficult breakdown */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">

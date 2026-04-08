@@ -18,16 +18,10 @@ const AudioPlayer = ({ audioUrl, autoPlay = false }) => {
         audio.addEventListener("loadedmetadata", updateDuration);
         audio.addEventListener("ended", handleEnded);
 
-        // Auto-play on URL change if it was already playing or explicitly requested
-        // Only if we have a valid source
         const hasValidSource = audioUrl && typeof audioUrl === 'string' && audioUrl.trim().length > 0;
-        
         if (hasValidSource && (isPlaying || autoPlay)) {
             audio.play().then(() => setIsPlaying(true)).catch(err => {
-                // Ignore AbortError which happens on rapid clicks
-                if (err.name !== 'AbortError') {
-                    console.error("Auto-play failed:", err);
-                }
+                if (err.name !== 'AbortError') console.error("Auto-play failed:", err);
             });
         }
 
@@ -36,113 +30,102 @@ const AudioPlayer = ({ audioUrl, autoPlay = false }) => {
             audio.removeEventListener("loadedmetadata", updateDuration);
             audio.removeEventListener("ended", handleEnded);
         };
-    }, [audioUrl]); // Depend on audioUrl to trigger on change
+    }, [audioUrl]);
 
     const togglePlay = () => {
         if (!audioRef.current || !audioUrl) return;
-
         if (isPlaying) {
             audioRef.current.pause();
             setIsPlaying(false);
         } else {
             audioRef.current.play()
                 .then(() => setIsPlaying(true))
-                .catch(err => {
-                    if (err.name !== 'AbortError') {
-                        console.error("Manual toggle play failed:", err);
-                    }
-                });
+                .catch(err => { if (err.name !== 'AbortError') console.error("Play failed:", err); });
         }
     };
 
-    const forward = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = Math.min(
-                audioRef.current.currentTime + 10,
-                duration
-            );
-        }
-    };
-
-    const backward = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = Math.max(
-                audioRef.current.currentTime - 10,
-                0
-            );
-        }
+    const seek = (seconds) => {
+        if (!audioRef.current) return;
+        audioRef.current.currentTime = Math.max(0, Math.min(audioRef.current.currentTime + seconds, duration));
     };
 
     const handleProgressClick = (e) => {
-        if (!audioRef.current) return;
-        const progressBar = e.currentTarget;
-        const clickX = e.nativeEvent.offsetX;
-        const width = progressBar.offsetWidth;
-        const newTime = (clickX / width) * duration;
-        audioRef.current.currentTime = newTime;
+        if (!audioRef.current || !duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const ratio = (e.clientX - rect.left) / rect.width;
+        audioRef.current.currentTime = ratio * duration;
     };
 
-    const formatTime = (time) => {
-        if (isNaN(time)) return "0:00";
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    const formatTime = (t) => {
+        if (!t || isNaN(t)) return "0:00";
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
     };
+
+    const progress = duration ? (currentTime / duration) * 100 : 0;
 
     return (
-        <div className="bg-gradient-to-r from-orange-50 to-orange-50 rounded-lg p-4 mt-3 border border-orange-200">
+        <div className="w-full bg-orange-50 border border-orange-200 rounded-xl p-3 mt-2">
             <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-            {/* Progress Bar */}
+            {/* Progress bar */}
             <div
-                className="w-full bg-gray-200 rounded-full h-2 mb-3 cursor-pointer overflow-hidden"
+                className="w-full h-2 bg-orange-200 rounded-full cursor-pointer mb-2 touch-none"
                 onClick={handleProgressClick}
             >
                 <div
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-100"
-                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                    className="h-2 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-100 pointer-events-none"
+                    style={{ width: `${progress}%` }}
                 />
             </div>
 
-            {/* Time Display */}
-            <div className="flex justify-between text-xs text-gray-600 mb-3">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-            </div>
+            {/* Time + Controls row */}
+            <div className="flex items-center justify-between gap-2">
+                {/* Time */}
+                <span className="text-[10px] text-gray-500 tabular-nums min-w-[60px]">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
 
-            {/* Control Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                <button
-                    onClick={backward}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-semibold shadow-sm text-xs sm:text-sm"
-                    title="Rewind 10 seconds"
-                >
-                    ⏪ 10s
-                </button>
-                <button
-                    onClick={togglePlay}
-                    className="px-4 sm:px-6 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-md flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
-                >
-                    {isPlaying ? (
-                        <>
-                            <span>⏸</span> Pause
-                        </>
-                    ) : (
-                        <>
-                            <span>▶</span> Play
-                        </>
-                    )}
-                </button>
-                <button
-                    onClick={forward}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-semibold shadow-sm text-xs sm:text-sm"
-                    title="Forward 10 seconds"
-                >
-                    10s ⏩
-                </button>
+                {/* Controls */}
+                <div className="flex items-center gap-1.5">
+                    <button
+                        onClick={() => seek(-10)}
+                        className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-white border border-orange-200 text-orange-700 text-[10px] font-semibold hover:bg-orange-50 transition"
+                        title="Rewind 10s"
+                    >
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V7l-4-4 4-4v2.03A9 9 0 0 1 12.5 3z"/><text x="7" y="16" fontSize="7" fontWeight="bold" fill="currentColor">10</text></svg>
+                        10s
+                    </button>
+
+                    <button
+                        onClick={togglePlay}
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow transition"
+                        title={isPlaying ? "Pause" : "Play"}
+                    >
+                        {isPlaying ? (
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>
+                        ) : (
+                            <svg className="w-3.5 h-3.5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+                        )}
+                    </button>
+
+                    <button
+                        onClick={() => seek(10)}
+                        className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-white border border-orange-200 text-orange-700 text-[10px] font-semibold hover:bg-orange-50 transition"
+                        title="Forward 10s"
+                    >
+                        10s
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 3a9 9 0 1 1-9 9h2a7 7 0 1 0 7-7V7l4-4-4-4v2.03A9 9 0 0 0 11.5 3z"/><text x="7" y="16" fontSize="7" fontWeight="bold" fill="currentColor">10</text></svg>
+                    </button>
+                </div>
+
+                {/* Spacer to balance time label */}
+                <span className="min-w-[60px]" />
             </div>
         </div>
     );
 };
 
 export default AudioPlayer;
+

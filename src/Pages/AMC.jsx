@@ -214,6 +214,11 @@ function AMC() {
       // Navigate to quiz taking page with the attempt ID (not test ID)
       // The API returns: { success, message, attempt: { id, started_at }, questions: [] }
       const attemptId = result.attempt?.id || result.attempt_id || result.id || testId;
+      
+      // Save attempt info for refresh recovery
+      localStorage.setItem('active_quiz_attempt_id', attemptId);
+      localStorage.setItem('active_quiz_is_mock', 'true');
+
       navigate(`/quiz/taking/${attemptId}`, {
         state: { isMockTest: true, testId: testId }
       });

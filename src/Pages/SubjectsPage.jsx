@@ -58,6 +58,11 @@ function SubjectsPage() {
             const testId = test.id || test.test_id || test.uuid;
             const result = await dispatch(startMockTest(testId)).unwrap();
             const attemptId = result.attempt?.id || result.attempt_id || result.id || testId;
+
+            // Save attempt info for refresh recovery
+            localStorage.setItem('active_quiz_attempt_id', attemptId);
+            localStorage.setItem('active_quiz_is_mock', 'true');
+
             navigate(`/quiz/taking/${attemptId}`);
         } catch (error) {
             dispatch(showNotification({

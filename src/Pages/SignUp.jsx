@@ -46,6 +46,7 @@ function Signup() {
     country_id: "",
     college_id: "",
     gender: "male",
+    preferred_language: "en",
     course_id: "",
     year: "",
     plan_id: "",
@@ -212,6 +213,7 @@ function Signup() {
         country_id: formData.country_id || "3856a7e7-0b14-4e88-a729-bb2bc1913d8d", // Use working AIIMS country ID
         college_name: formData.college_name,
         gender: formData.gender,
+        preferred_language: formData.preferred_language || "en",
         mobile: formData.phone,
         payment_id: `PAY_${Date.now()}`, // RESTORED: Backend requires this field. Using PAY_ prefix to bypass verification.
         transaction_id: `PAY_${Date.now()}`, // Kept as alias for consistency
@@ -301,6 +303,7 @@ function Signup() {
         college_id: formData.college_id,
         college_name: formData.college_name,
         gender: formData.gender,
+        preferred_language: formData.preferred_language || "en",
         mobile: formData.phone,
         phone: formData.phone, // Alias
         password_confirmation: formData.confirmPassword,
@@ -456,6 +459,20 @@ function Signup() {
                   <span className="capitalize">{g}</span>
                 </label>
               ))}
+            </div>
+
+            {/* Preferred Explanation Language */}
+            <div className="flex flex-col gap-1">
+              <label className="text-gray-600 font-medium text-sm">Preferred Audio Explanation Language</label>
+              <select
+                name="preferred_language"
+                value={formData.preferred_language}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border rounded-xl bg-white"
+              >
+                <option value="en">English (Default)</option>
+                <option value="hi">Hinglish</option>
+              </select>
             </div>
 
             {/* Country Selection */}

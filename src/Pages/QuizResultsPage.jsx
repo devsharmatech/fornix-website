@@ -19,6 +19,31 @@ import {
     selectMockTestsError,
 } from '../redux/slices/mockTestsSlice';
 
+const ExplanationText = ({ text }) => {
+    const [expanded, setExpanded] = React.useState(false);
+    const LIMIT = 220;
+    const isLong = text && text.length > LIMIT;
+    const displayed = !isLong || expanded ? text : text.slice(0, LIMIT).trimEnd() + '…';
+
+    return (
+        <div>
+            <p className="text-xs sm:text-sm text-orange-800 leading-relaxed">{displayed}</p>
+            {isLong && (
+                <button
+                    onClick={() => setExpanded(p => !p)}
+                    className="mt-1.5 text-[11px] font-bold text-orange-600 hover:text-orange-800 transition flex items-center gap-1"
+                >
+                    {expanded ? (
+                        <>See Less <span className="text-base leading-none">↑</span></>
+                    ) : (
+                        <>See More <span className="text-base leading-none">↓</span></>
+                    )}
+                </button>
+            )}
+        </div>
+    );
+};
+
 const AudioExplanationSection = ({ question, globalLang, globalGender }) => {
     const audioUrls = question.explanation_audio_urls || {};
     const maleUrl = question.male_explanation_audio_url;
@@ -40,22 +65,26 @@ const AudioExplanationSection = ({ question, globalLang, globalGender }) => {
         if (typeof selectedLangAudio === 'string') {
             currentAudioUrl = selectedLangAudio;
         } else if (isLangObject) {
-            currentAudioUrl = globalGender === 'female' 
-                ? (selectedLangAudio.female || selectedLangAudio.male) 
-                : (selectedLangAudio.male || selectedLangAudio.female);
+            // Respect user-selected gender; if chosen gender missing, fallback to the other
+            if (globalGender === 'male') {
+                currentAudioUrl = selectedLangAudio.male || selectedLangAudio.female || null;
+            } else {
+                // female (default)
+                currentAudioUrl = selectedLangAudio.female || selectedLangAudio.male || null;
+            }
         }
     } else {
-        // Fallback to generic urls
-        currentAudioUrl = globalGender === 'female' ? (femaleUrl || maleUrl) : (maleUrl || femaleUrl);
+        // Fallback to generic urls — honour toggle, female-first default
+        if (globalGender === 'male') {
+            currentAudioUrl = maleUrl || femaleUrl || null;
+        } else {
+            currentAudioUrl = femaleUrl || maleUrl || null;
+        }
     }
 
+    // If no valid audio URL exists at all, don't render anything
     if (!currentAudioUrl || typeof currentAudioUrl !== 'string' || currentAudioUrl.trim() === '') {
-        return (
-            <div className="mt-3 sm:mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200 flex items-center gap-2">
-                <span className="text-orange-500">⚠️</span>
-                <p className="text-xs text-orange-700 font-medium italic">Audio explanation unavailable</p>
-            </div>
-        );
+        return null;
     }
 
     return (
@@ -85,11 +114,13 @@ function QuizResultsPage() {
     const mockTestLoading = useSelector(selectMockTestsLoading);
     const mockTestError = useSelector(selectMockTestsError);
 
+    const user = useSelector(selectUser);
+
     const [localResults, setLocalResults] = useState(null);
 
-    // Global Audio Configuration State
-    const [globalLang, setGlobalLang] = useState('en');
-    const [globalGender, setGlobalGender] = useState('male');
+    // Global Audio Configuration State — female voice by default
+    const [globalLang, setGlobalLang] = useState(user?.preferred_language || 'en');
+    const [globalGender, setGlobalGender] = useState('female');
 
     const isMockTest = quizId && quizId.includes('-mock-test');
     // For mock tests, the quizId parameter IS the attempt_id (based on how we navigate in QuizTakingPage)
@@ -103,45 +134,31 @@ function QuizResultsPage() {
     // Let's assume the ID extracted from URL is the attempt_id.
     const testIdFromUrl = isMockTest ? quizId.replace('-mock-test', '') : null;
     const attemptIdFromState = location.state?.attemptId;
-    const user = useSelector(selectUser);
 
     
 
     
 
     useEffect(() => {
-        if (quizId === 'direct') {
-            // Load results from localStorage for direct quizzes
-            const storedResults = localStorage.getItem('quiz_results_direct');
-
-            if (storedResults) {
-                try {
-                    const parsedResults = JSON.parse(storedResults);
-                    setLocalResults(parsedResults);
-                } catch (error) {
-                    console.error('Failed to parse stored quiz results:', error);
-                }
-            }
-        } else if (isMockTest && testIdFromUrl) {
+        if (isMockTest && testIdFromUrl) {
             // Fetch mock test results
             const userId = user?.user_id || user?.id || user?.uuid;
             if (userId) {
                 dispatch(fetchMockTestResult({
-
                     attempt_id: testIdFromUrl,
                     user_id: userId
                 }));
             }
-        } else if (quizId) {
+        } else if (quizId && quizId !== 'direct') {
             const userId = user?.user_id || user?.id || user?.uuid;
             dispatch(fetchAttemptDetails({ attempt_id: quizId, user_id: userId }));
         }
     }, [dispatch, quizId, isMockTest, testIdFromUrl, attemptIdFromState, user]);
 
     // Use appropriate results based on type
-    const results = quizId === 'direct' ? localResults : (isMockTest ? mockTestResult : (attemptDetails || reduxResults));
-    const loading = isMockTest ? mockTestLoading : (quizId === 'direct' ? false : quizLoading);
-    const error = isMockTest ? mockTestError : (quizId === 'direct' ? null : quizError);
+    const results = isMockTest ? mockTestResult : (attemptDetails || reduxResults);
+    const loading = isMockTest ? mockTestLoading : quizLoading;
+    const error = isMockTest ? mockTestError : quizError;
 
     // Helper to extract stats safely from various response structures
     const getStats = (data) => {
@@ -408,14 +425,25 @@ function QuizResultsPage() {
                     <div className="space-y-4 sm:space-y-6">
                             {reviewQuestions.map((item, index) => {
                                 // Extract question data - could be nested in item.question (New API) or flat (Old API/Local)
-                                const question = item.question || item;
+                                // IMPORTANT: In some modes, item.question IS the text string, while item contains the options.
+                                // We first determine if item is the full container or if there's a nested object.
+                                const questionObj = (item.question && typeof item.question === 'object') ? item.question : item;
+                                
+                                // Now extract the text from the chosen object
+                                const questionText = questionObj.question_text || 
+                                                     (typeof questionObj.question === 'string' ? questionObj.question : null) || 
+                                                     questionObj.question?.text || 
+                                                     questionObj.text?.content || 
+                                                     questionObj.text || 
+                                                     questionObj.content || 
+                                                     'Question text missing';
                                 
                                 // Handle both API response formats
                                 const isCorrect = item.is_correct !== undefined
                                     ? item.is_correct
-                                    : (item.user_answer !== undefined && question.correct_answer !== undefined && 
-                                       (String(item.user_answer) === String(question.correct_answer) || 
-                                       (item.selected_key && String(item.selected_key).toLowerCase() === String(question.correct_key || question.correct_answer).toLowerCase())));
+                                    : (item.user_answer !== undefined && (questionObj.correct_answer !== undefined || questionObj.correct_key !== undefined) && 
+                                       (String(item.user_answer).toLowerCase() === String(questionObj.correct_answer || questionObj.correct_key).toLowerCase() || 
+                                       (item.selected_key && String(item.selected_key).toLowerCase() === String(questionObj.correct_key || questionObj.correct_answer).toLowerCase())));
 
                                 return (
                                     <div
@@ -433,14 +461,14 @@ function QuizResultsPage() {
                                             </span>
                                         </div>
                                         <h3 className="text-sm sm:text-lg font-semibold text-gray-900 break-words whitespace-pre-wrap leading-relaxed mb-4 sm:mb-5">
-                                            {question.question_text || question.question || (typeof question.text === 'string' ? question.text : (question.text?.content || question.content || 'Question Text Missing'))}
+                                            {questionText}
                                         </h3>
 
                                         {/* Supplemental Question Image */}
-                                        {(question.image_url || question.question_image_url) && (
+                                        {(questionObj.image_url || questionObj.question_image_url) && (
                                             <div className="mb-4 bg-white/60 rounded-xl p-2 sm:p-4 flex justify-center w-full shadow-sm border border-gray-100">
                                                 <img 
-                                                    src={question.image_url || question.question_image_url} 
+                                                    src={questionObj.image_url || questionObj.question_image_url} 
                                                     alt="Question Visualization" 
                                                     className="max-w-full md:max-w-xl max-h-[250px] object-contain rounded-lg"
                                                     onError={(e) => { e.target.style.display = 'none'; }}
@@ -451,7 +479,7 @@ function QuizResultsPage() {
                                         <div className="flex flex-col gap-3 sm:gap-4 mt-3 sm:mt-4">
                                             {/* Options Section */}
                                             <div className="grid gap-1.5 sm:gap-2">
-                                                {(question.options || []).map((opt) => {
+                                                {(questionObj.options || []).map((opt) => {
                                                     const optionKey = typeof opt === 'string' ? opt.charAt(0).toLowerCase() : (opt.option_key || opt.key);
                                                     const optionContent = typeof opt === 'string' ? opt : (opt.content || opt.text);
 
@@ -459,8 +487,8 @@ function QuizResultsPage() {
                                                     const isUserAnswer = (item.selected_key && String(item.selected_key).toLowerCase() === String(optionKey).toLowerCase()) ||
                                                         (item.user_answer && String(item.user_answer).toLowerCase() === String(optionKey).toLowerCase());
 
-                                                    const isCorrectAnswer = (question.correct_key && String(question.correct_key).toLowerCase() === String(optionKey).toLowerCase()) ||
-                                                        (question.correct_answer && String(question.correct_answer).toLowerCase() === String(optionKey).toLowerCase());
+                                                    const isCorrectAnswer = (questionObj.correct_key && String(questionObj.correct_key).toLowerCase() === String(optionKey).toLowerCase()) ||
+                                                        (questionObj.correct_answer && String(questionObj.correct_answer).toLowerCase() === String(optionKey).toLowerCase());
 
                                                     return (
                                                         <div
@@ -498,13 +526,13 @@ function QuizResultsPage() {
                                             </div>
                                         </div>
 
-                                        {(question.explanation || question.explanation_text) && (
-                                            <div className="bg-orange-50 border-l-4 border-orange-500 p-3 sm:p-4 rounded mt-3 sm:mt-4">
+                                        {(questionObj.explanation || questionObj.explanation_text) && (
+                                            <div className="mt-3 sm:mt-4">
                                                 <p className="text-xs sm:text-sm font-semibold text-orange-900 mb-1">Explanation:</p>
-                                                <p className="text-xs sm:text-sm text-orange-800">{question.explanation || question.explanation_text}</p>
+                                                <ExplanationText text={questionObj.explanation || questionObj.explanation_text} />
 
                                                 <AudioExplanationSection 
-                                                    question={question} 
+                                                    question={questionObj} 
                                                     globalLang={globalLang} 
                                                     globalGender={globalGender} 
                                                 />

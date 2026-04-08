@@ -36,7 +36,7 @@ function TopicsPage() {
     const { notes, loading: notesLoading, error: notesError } = useSelector(selectChapterNotes(chapterId));
 
     const [selectedTopics, setSelectedTopics] = useState([]);
-    const [activeTab, setActiveTab] = useState('topics'); // 'topics' or 'notes'
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'topics'); // 'topics' or 'notes'
 
     // PDF Viewer State
     const [showPdfModal, setShowPdfModal] = useState(false);

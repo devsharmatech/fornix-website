@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import AudioPlayer from '../Components/AudioPlayer';
 import {
     fetchUniversityExamResult,
     selectUniversityExamResult,
@@ -8,6 +9,47 @@ import {
     selectUniversityExamsError,
     clearExamResult
 } from '../redux/slices/universityExamsSlice';
+import { selectUser } from '../redux/slices/authSlice';
+
+const AudioExplanationSection = ({ question, globalLang, globalGender }) => {
+    const audioUrls = question.explanation_audio_urls || {};
+    const maleUrl = question.male_explanation_audio_url;
+    const femaleUrl = question.female_explanation_audio_url;
+
+    let selectedLangAudio = audioUrls[globalLang];
+    if (!selectedLangAudio && globalLang && globalLang !== 'en') {
+        selectedLangAudio = audioUrls['en'] || audioUrls['EN'];
+    }
+
+    let currentAudioUrl = null;
+    if (selectedLangAudio) {
+        if (typeof selectedLangAudio === 'string') {
+            currentAudioUrl = selectedLangAudio;
+        } else if (typeof selectedLangAudio === 'object') {
+            currentAudioUrl = globalGender === 'male'
+                ? (selectedLangAudio.male || selectedLangAudio.female || null)
+                : (selectedLangAudio.female || selectedLangAudio.male || null);
+        }
+    } else {
+        currentAudioUrl = globalGender === 'male'
+            ? (maleUrl || femaleUrl || null)
+            : (femaleUrl || maleUrl || null);
+    }
+
+    if (!currentAudioUrl || typeof currentAudioUrl !== 'string' || currentAudioUrl.trim() === '') {
+        return null;
+    }
+
+    return (
+        <div className="mt-4 p-3 sm:p-4 bg-white/50 rounded-xl border border-orange-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <span className="text-lg sm:text-xl">🎧</span>
+                <p className="text-xs sm:text-sm font-bold text-orange-900 uppercase tracking-wider">Audio Explanation</p>
+            </div>
+            <AudioPlayer audioUrl={currentAudioUrl} autoPlay={false} />
+        </div>
+    );
+};
 
 const UniversityExamResultPage = () => {
     const { examId } = useParams();
@@ -22,8 +64,17 @@ const UniversityExamResultPage = () => {
     const resultData = useSelector(selectUniversityExamResult);
     const loading = useSelector(selectUniversityExamsResultLoading);
     const error = useSelector(selectUniversityExamsError);
+    const user = useSelector(selectUser);
 
     const [activeFilter, setActiveFilter] = useState('all'); // all, correct, incorrect, skipped
+    const [globalLang, setGlobalLang] = useState('en');
+    const [globalGender, setGlobalGender] = useState('female');
+
+    useEffect(() => {
+        if (user?.preferred_language) {
+            setGlobalLang(user.preferred_language);
+        }
+    }, [user?.preferred_language]);
 
     useEffect(() => {
         // If we have an examId in the URL, fetch the latest result for it
@@ -172,26 +223,58 @@ const UniversityExamResultPage = () => {
                         <div className="flex flex-col sm:flex-row items-center justify-between mb-8 pb-4 border-b border-gray-200">
                             <h3 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Question Review</h3>
 
-                            {/* Filters */}
-                            <div className="flex bg-gray-100 p-1 rounded-xl scrollbar-hide overflow-x-auto w-full sm:w-auto">
-                                <button
-                                    onClick={() => setActiveFilter('all')}
-                                    className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
-                                >
-                                    All ({questionsReview.length})
-                                </button>
-                                <button
-                                    onClick={() => setActiveFilter('correct')}
-                                    className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'correct' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-green-600'}`}
-                                >
-                                    Correct
-                                </button>
-                                <button
-                                    onClick={() => setActiveFilter('incorrect')}
-                                    className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'incorrect' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-red-600'}`}
-                                >
-                                    Incorrect
-                                </button>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                                {/* Audio Settings */}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                        <span className="text-xs font-bold text-orange-700 uppercase">Lang:</span>
+                                        <select
+                                            value={globalLang}
+                                            onChange={(e) => setGlobalLang(e.target.value)}
+                                            className="text-xs font-bold bg-transparent border-none focus:ring-0 cursor-pointer text-orange-900 p-0"
+                                        >
+                                            <option value="en">English</option>
+                                            <option value="hi">Hinglish</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex bg-white rounded-lg p-1 border border-orange-200">
+                                        {['female', 'male'].map((g) => (
+                                            <button
+                                                key={g}
+                                                onClick={() => setGlobalGender(g)}
+                                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                                                    globalGender === g
+                                                        ? 'bg-orange-100 text-orange-700 shadow-inner'
+                                                        : 'text-gray-500 hover:text-gray-700'
+                                                }`}
+                                            >
+                                                {g.charAt(0).toUpperCase() + g.slice(1)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Filters */}
+                                <div className="flex bg-gray-100 p-1 rounded-xl scrollbar-hide overflow-x-auto w-full sm:w-auto">
+                                    <button
+                                        onClick={() => setActiveFilter('all')}
+                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+                                    >
+                                        All ({questionsReview.length})
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveFilter('correct')}
+                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'correct' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-green-600'}`}
+                                    >
+                                        Correct
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveFilter('incorrect')}
+                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'incorrect' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-red-600'}`}
+                                    >
+                                        Incorrect
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -283,6 +366,11 @@ const UniversityExamResultPage = () => {
                                                         Explanation
                                                     </div>
                                                     <p className="text-orange-900 whitespace-pre-line pt-2">{q.explanation}</p>
+                                                    <AudioExplanationSection
+                                                        question={q}
+                                                        globalLang={globalLang}
+                                                        globalGender={globalGender}
+                                                    />
                                                 </div>
                                             )}
                                         </div>

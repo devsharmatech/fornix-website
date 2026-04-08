@@ -190,10 +190,10 @@ function Header() {
             {user && <NotificationBell />}
             <button
               onClick={toggleMobileMenu}
-              className="relative p-2 -mr-2 text-gray-800 hover:bg-orange-50 rounded-xl transition-colors active:bg-orange-100 flex items-center justify-center focus:outline-none"
+              className="relative p-2 px-4 -mr-2 text-gray-800 hover:bg-orange-50 rounded-xl transition-colors active:bg-orange-100 flex items-center justify-center focus:outline-none"
               aria-label="Toggle menu"
             >
-              <div className="w-6 h-[18px] relative flex flex-col justify-between">
+              <div className="w-5 h-[18px] relative flex flex-col justify-between">
                 <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'transform rotate-45 translate-y-[7.5px]' : ''}`} />
                 <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-200 ease-in-out ${isMobileMenuOpen ? 'opacity-0 x-translate-4' : 'opacity-100'}`} />
                 <span className={`block w-full h-[2.5px] bg-current rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'transform -rotate-45 -translate-y-[7.5px]' : ''}`} />
@@ -380,7 +380,7 @@ function Header() {
               animation: spin 6s linear infinite;
             }
           `}</style>
-          
+
           <Link
             to="/smart-tracking"
             className="attention-grabber-btn fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-linear-to-r from-orange-600 to-orange-700 text-white rounded-r-2xl flex items-center transition-all duration-300 group overflow-hidden border-2 border-white/40 border-l-0"
@@ -388,10 +388,10 @@ function Header() {
             <div className="p-3.5 relative flex items-center justify-center">
               {/* Aggressive Fast Pinging Ring */}
               <div className="absolute inset-0 border-[3px] border-white rounded-r-xl opacity-60 animate-ping" style={{ animationDuration: '1s' }}></div>
-              
+
               {/* Spinning Target Icon */}
               <FiTarget className="attention-icon w-8 h-8 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-              
+
               {/* Little red dot alert indicator */}
               <span className="absolute top-2 right-2 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
